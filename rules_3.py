@@ -17,7 +17,7 @@ for rule_no in range(256):
     im = np.ndarray((NO_STEPS, WIDTH), dtype='uint8')
     im[:,:] = 1
     im[0, MID_POINT] = 0
-    
+
     rule = np.binary_repr(rule_no, 8)
 
     for step in range(1, NO_STEPS):

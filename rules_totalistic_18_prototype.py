@@ -13,12 +13,12 @@ MID_POINT = 50
 NO_STEPS = 100
 
 order = 18
-length = order
+length = order**3
 
 def probabilitic_nary_counter(length: int, num: int):
     return np.random.choice(range(0, num), length)
 
-for rule_no in range(300):
+for rule_no in range(5000):
     im = np.ndarray((NO_STEPS, WIDTH), dtype='int16')
     im[:,:] = order-1
     im[0, MID_POINT] = 0
@@ -27,6 +27,7 @@ for rule_no in range(300):
 
     for step in range(1, NO_STEPS):
         for i in range(1, WIDTH-1):
+            # index = im[step-1, i-1:i+2].join(';')
             x,y,z = im[step-1, i-1:i+2]
             index = x*(order**2)+y*(order)+z
             im[step, i] = rule[index]
