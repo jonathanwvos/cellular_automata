@@ -48,7 +48,7 @@ cv2.circle(prev_frame, (HEIGHT//2, WIDTH//2), radius=20, color=(1,1,1), thicknes
 prev_frame = prev_frame.astype(np.uint32)
 #######################
 
-output_video = cv2.VideoWriter('test18.mp4', cv2.VideoWriter_fourcc(*"mp4v"), 30, (1000,1000), isColor=False)
+output_video = cv2.VideoWriter(join('rules_totalistic_move', 'test18.mp4'), cv2.VideoWriter_fourcc(*"mp4v"), 30, (1000,1000), isColor=False)
 
 for frame in range(450):
     next_frame = np.zeros((HEIGHT, WIDTH), dtype='uint32')
