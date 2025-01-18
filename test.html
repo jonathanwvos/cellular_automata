@@ -8,18 +8,27 @@
                 margin-bottom: 12px;
             }
             #myCanvas {
+                width: 1000px;
+                height: 1000px;
                 border: 1px solid #ccc;
+                image-rendering: pixelated;
             }
         </style>
     </head>
     <body>
         <div id="controls">
+            <button id="init">Initialize</button>
+            <br />
             <label for="fpsRange">Frame Rate:</label>
-            <input type="range" id="fpsRange" min="1" max="60" value="30" />
-            <span id="fpsValue">30</span> FPS
+            <input type="range" id="fpsRange" min="1" max="60" value="1" />
+            <span id="fpsValue">1</span> FPS
+            <br />
+            <button id="playButton" value="pause">Play</button>
+            <br />
+            <span id="ruleLabel"></span>
         </div>
 
-        <canvas id="myCanvas" width="900" height="900"></canvas>
+        <canvas id="myCanvas" width="100" height="100"></canvas>
 
         <script src="app.js"></script>
     </body>
