@@ -7,7 +7,7 @@ const playButton = document.getElementById("playButton");
 const ruleStr = document.getElementById("ruleStr");
 const initButton = document.getElementById("init");
 const changeRuleButton = document.getElementById("ruleChange");
-const kernelInputGrid = document.getElementById('kernelInputGrid');
+const kernelInputGrid = document.getElementById("kernelInputGrid");
 
 // Default frames per second
 let fps = parseInt(fpsRange.value);
@@ -19,19 +19,24 @@ const WIDTH = 100;
 const HEIGHT = 100;
 const CANVAS_WIDTH = 900;
 const CANVAS_HEIGHT = 900;
-const ORDER = 2;
-const LENGTH = Math.pow(ORDER, 5);
+const ORDER = 6;
 let rule = null;
 let prev_frame = null;
 let kernel = [];
+let totalistic = true;
+
+function kernel_length() {
+  if (totalistic) return ORDER;
+  else return Math.pow(ORDER, kernel.length);
+}
 
 function initSim() {
-  rule = probabilisticNaryCounter(LENGTH, ORDER);
-  prev_frame = new Array(WIDTH * HEIGHT).fill(1);
+  rule = probabilisticNaryCounter(kernel_length(), ORDER);
+  prev_frame = new Array(WIDTH * HEIGHT).fill(0);
   // ruleLabel.textContent = rule.toString();
   ruleStr.value = rule.toString();
 
-  kernelInputGrid.innerHTML = '';
+  kernelInputGrid.innerHTML = "";
 
   // Number of rows and columns
   const rows = 5;
@@ -40,15 +45,15 @@ function initSim() {
   // Create the grid buttons
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
-      const button = document.createElement('div');
-      button.classList.add('kernel-grid-button');
+      const button = document.createElement("div");
+      button.classList.add("kernel-grid-button");
       button.dataset.row = row;
       button.dataset.col = col;
 
       // Add a click event listener to each button
-      button.addEventListener('click', () => {
+      button.addEventListener("click", () => {
         // Toggle the active class
-        button.classList.toggle('active');
+        button.classList.toggle("active");
       });
 
       // Add the button to the grid container
@@ -61,8 +66,21 @@ function probabilisticNaryCounter(length, num) {
   return Array.from({ length }, () => Math.floor(Math.random() * num));
 }
 
-function ca_index(a, b, c, d, e) {
-  return a + b * ORDER + c * ORDER ** 2 + d * ORDER ** 3 + e * ORDER ** 4;
+function ca_index(cell_values) {
+  let index = 0;
+
+  if (totalistic) {
+    index = Math.round(
+      cell_values.reduce((partialSum, a) => partialSum + a, 0) /
+        cell_values.length,
+    );
+  } else {
+    for (let i = 0; i < cell_values.length(); i++) {
+      index += cell_values[i] * ORDER ** i;
+    }
+  }
+
+  return index;
 }
 
 function flat_index(h, w) {
@@ -70,17 +88,15 @@ function flat_index(h, w) {
 }
 
 function kernel_index(h, w) {
-    h = ((h % HEIGHT) + HEIGHT) % HEIGHT;
-    w = ((w % WIDTH) + WIDTH) % WIDTH;
-    return h * HEIGHT + w;
+  h = ((h % HEIGHT) + HEIGHT) % HEIGHT;
+  w = ((w % WIDTH) + WIDTH) % WIDTH;
+  return h * HEIGHT + w;
 }
-
 
 // This function updates the scene (e.g., positions of shapes, game logic, etc.)
 function update() {
   next_frame = Array.from(prev_frame);
 
-  console.log(kernel);
   for (let h = 0; h < HEIGHT; h++) {
     for (let w = 0; w < WIDTH; w++) {
       let cell_values = [];
@@ -90,36 +106,12 @@ function update() {
         cell_values.push(prev_frame[k_index]);
       }
 
-      next_frame[flat_index(h, w)] = rule[ca_index(...cell_values)];
+      next_frame[flat_index(h, w)] = rule[ca_index(cell_values)];
     }
   }
 
-
-  // let a = 0;
-  // let b = 0;
-  // let c = 0;
-  // let d = 0;
-  // let e = 0;
-  // next_frame = Array.from(prev_frame);
-
-  // for (let h = 0; h < HEIGHT; h++) {
-  //   for (let w = 0; w < WIDTH; w++) {
-  //     // |   x   |(h-1,w)|   x   |
-  //     // |(h,w-1)| (h,w) |(h,w+1)|
-  //     // |   x   |(h+1,w)|   x   |
-
-  //     a = prev_frame[kernel_index(h-1, w)];
-  //     b = prev_frame[kernel_index(h, w-1)];
-  //     c = prev_frame[kernel_index(h, w)];
-  //     d = prev_frame[kernel_index(h, w+1)];
-  //     e = prev_frame[kernel_index(h+1, w)];
-  //     next_frame[flat_index(h, w)] = rule[ca_index(a, b, c, d, e)];
-  //   }
-  // }
-
   prev_frame = next_frame;
 }
-
 
 // This function draws the content on the canvas
 function draw() {
@@ -138,7 +130,7 @@ function draw() {
   for (let i = 0; i < prev_frame.length; i++) {
     const normalizedValue = normalized_frame[i];
     const pixelIndex = i * 4; // RGBA indices
-    imageDataArray[pixelIndex] = normalizedValue; // R
+    imageDataArray[pixelIndex] = normalizedValue * 0.8; // R
     imageDataArray[pixelIndex + 1] = normalizedValue; // G
     imageDataArray[pixelIndex + 2] = normalizedValue; // B
     imageDataArray[pixelIndex + 3] = 255; // A (fully opaque)
@@ -146,7 +138,6 @@ function draw() {
 
   const imageData = new ImageData(imageDataArray, WIDTH, HEIGHT);
   ctx.putImageData(imageData, 0, 0);
-  // ctx.scale(10, 10);
 }
 
 // The main animation function which gets called each "frame"
@@ -196,18 +187,18 @@ initButton.addEventListener("click", () => {
 });
 
 changeRuleButton.addEventListener("click", () => {
-    let newRule = ruleStr.value;
-    rule = newRule.split(',').map(Number);
-    kernel = [];
+  rule = ruleStr.value.split(",").map(Number);
+  kernel = [];
 
-    for (let col = 0; col < 5; col++) {
-      for (let row = 0; row < 5; row++) {
-        const button = document.querySelector(`.kernel-grid-button[data-row="${row}"][data-col="${col}"]`);
-        
-        if (button.classList.contains('active'))
-          kernel.push([row, col]);
-      }
+  for (let col = 0; col < 5; col++) {
+    for (let row = 0; row < 5; row++) {
+      const button = document.querySelector(
+        `.kernel-grid-button[data-row="${row}"][data-col="${col}"]`,
+      );
+
+      if (button.classList.contains("active")) kernel.push([row, col]);
     }
+  }
 });
 
 canvas.addEventListener("click", (event) => {
@@ -226,7 +217,7 @@ canvas.addEventListener("click", (event) => {
   const mapped_x = Math.floor(x * scaleX);
   const mapped_y = Math.floor(y * scaleY);
 
-  prev_frame[flat_index(mapped_y, mapped_x)] = 0;
+  prev_frame[flat_index(mapped_y, mapped_x)] = 1;
   draw();
 });
 
