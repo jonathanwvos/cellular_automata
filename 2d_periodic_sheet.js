@@ -7,6 +7,7 @@ const playButton = document.getElementById("playButton");
 const ruleStr = document.getElementById("ruleStr");
 const initButton = document.getElementById("init");
 const changeRuleButton = document.getElementById("ruleChange");
+const changeKernelButton = document.getElementById("kernelChange");
 const kernelInputGrid = document.getElementById("kernelInputGrid");
 
 // Default frames per second
@@ -24,6 +25,7 @@ let rule = null;
 let prev_frame = null;
 let kernel = [];
 let totalistic = true;
+let totalisticType = "";
 
 function kernel_length() {
   if (totalistic) return ORDER;
@@ -187,6 +189,10 @@ initButton.addEventListener("click", () => {
 });
 
 changeRuleButton.addEventListener("click", () => {
+  rule = ruleStr.value.split(",").map(Number);
+});
+
+changeKernelButton.addEventListener("click", () => {
   rule = ruleStr.value.split(",").map(Number);
   kernel = [];
 
